@@ -1,4 +1,4 @@
-package supererror
+package superError
 
 import "fmt"
 
