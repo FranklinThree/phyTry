@@ -1,7 +1,7 @@
 package formula
 
 import (
-	"com/github/FranklinThree/phyTry/advancedError"
+	"com/github/FranklinThree/phyTry/superError"
 	"fmt"
 	"reflect"
 )
@@ -11,27 +11,34 @@ type LinkedList struct {
 	length  int
 	Head    *LinkedNode
 	Tail    *LinkedNode
-	Type    reflect.Type
+	TypeOf  any
 	isEmpty int
 }
 
 // CreateList 创建并初始化链表
 func CreateList(TypeOf any) (list LinkedList, err error) {
-	return LinkedList{length: 0, Type: reflect.TypeOf(TypeOf), isEmpty: 1}, advancedError.ExampleError(1)
+	return LinkedList{length: 0, TypeOf: TypeOf, isEmpty: 1}, superError.ExampleError(1)
 }
 
+// CheckType 检查类型是否匹配（严格）
 func (list *LinkedList) CheckType(Value any) error {
-	//fmt.Printf(">>>> %v >>>> %v\n", reflect.TypeOf(Value), list.Type)
-	if reflect.TypeOf(Value) == list.Type {
+	fmt.Printf(">>>> %v >>>> %v\n", reflect.TypeOf(Value), reflect.TypeOf(list.TypeOf))
+	if reflect.TypeOf(Value) == reflect.TypeOf(list.TypeOf) {
 		return nil
 	} else {
-		return advancedError.TypeNotFitError(list.Type, reflect.TypeOf(Value))
+		return superError.TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
 	}
+}
+
+// CheckTypeCompatible 检查类型是否兼容（宽松）
+func (list *LinkedList) CheckTypeCompatible(Value any) error {
+	//fmt.Printf(">>>> %v >>>> %v\n", reflect.TypeOf(Value), list.TypeOf)
+	return nil
 }
 
 func (list *LinkedList) Add(Value any) (err error) {
 	err = list.CheckType(Value)
-	if !advancedError.CheckErr(err, 0) {
+	if !superError.CheckErr(err, 0) {
 		return err
 	}
 	node := LinkedNode{Value, list.Tail, nil}

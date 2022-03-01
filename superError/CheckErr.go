@@ -1,9 +1,10 @@
-package advancedError
+package superError
 
 import "fmt"
 
 // CheckErr 可以继续运行返回ture，无法运行返回false
 func CheckErr(err error, level int) bool {
+
 	switch err.(type) {
 	case IgnorableError:
 		if level > 1 {

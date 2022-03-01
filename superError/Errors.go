@@ -1,4 +1,4 @@
-package advancedError
+package superError
 
 import (
 	"fmt"
@@ -6,13 +6,25 @@ import (
 )
 
 type RuntimeError struct {
-	format string
-	args   []any
+	Format string
+	Args   []any
 }
 
 func (re RuntimeError) Error() string {
+	arr := [9]any{}
 
-	return fmt.Sprintf(re.format, re.args)
+	length := 0
+	for _, anything := range re.Args {
+		arr[length] = anything
+		length++
+	}
+	fmt.Println(len(arr))
+	return fmt.Sprintf(re.Format, arr[:length])
+}
+
+func SSPrintf(format string, args []any) string {
+
+	return ""
 }
 
 type IgnorableError struct {
@@ -44,5 +56,5 @@ func ExampleError(Number int) IgnorableError {
 func TypeNotFitError(Type1 reflect.Type, Type2 reflect.Type) SeriousError {
 	var x []any
 	x = append(x, Type1, Type2)
-	return SeriousError{RuntimeError{"Type Not Fit! Expected: %v <-> Got: %v", x}}
+	return SeriousError{RuntimeError{"TypeOf Not Fit! Expected: %+v <-> Got: %+v", x}}
 }
