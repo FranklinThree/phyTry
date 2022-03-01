@@ -11,15 +11,8 @@ type RuntimeError struct {
 }
 
 func (re RuntimeError) Error() string {
-	arr := [9]any{}
 
-	length := 0
-	for _, anything := range re.Args {
-		arr[length] = anything
-		length++
-	}
-	fmt.Println(len(arr))
-	return fmt.Sprintf(re.Format, arr[:length])
+	return fmt.Sprintf(re.Format, re.Args...)
 }
 
 func SSPrintf(format string, args []any) string {
