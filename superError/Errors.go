@@ -49,5 +49,5 @@ func ExampleError(Number int) IgnorableError {
 func TypeNotFitError(Type1 reflect.Type, Type2 reflect.Type) SeriousError {
 	var x []any
 	x = append(x, Type1, Type2)
-	return SeriousError{RuntimeError{"TypeOf Not Fit! Expected: %+v <-> Got: %+v", x}}
+	return SeriousError{RuntimeError{"Type Not Fit! Expected: %+v <-> Got: %+v", x}}
 }
