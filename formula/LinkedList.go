@@ -1,7 +1,7 @@
 package formula
 
 import (
-	"com/github/FranklinThree/phyTry/superError"
+	"com/github/FranklinThree/phyTry/supererror"
 	"fmt"
 	"reflect"
 )
@@ -17,7 +17,7 @@ type LinkedList struct {
 
 // CreateList 创建并初始化链表
 func CreateList(TypeOf any) (list LinkedList, err error) {
-	return LinkedList{length: 0, TypeOf: TypeOf, isEmpty: 1}, superError.ExampleError(1)
+	return LinkedList{length: 0, TypeOf: TypeOf, isEmpty: 1}, supererror.ExampleError(1)
 }
 
 // CheckType 检查类型是否匹配（严格）
@@ -26,7 +26,7 @@ func (list *LinkedList) CheckType(Value any) error {
 	if reflect.TypeOf(Value) == reflect.TypeOf(list.TypeOf) {
 		return nil
 	} else {
-		return superError.TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
+		return supererror.TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
 	}
 }
 
@@ -40,10 +40,10 @@ func (list *LinkedList) CheckTypeCompatible(Value any) error {
 	return nil
 }
 
-// AddValue 向链表添加元素
-func (list *LinkedList) AddValue(Value any) (err error) {
+// AppendValue 向链表尾部添加元素（自动创建节点）
+func (list *LinkedList) AppendValue(Value any) (err error) {
 	err = list.CheckType(Value)
-	if !superError.CheckErr(err, 0) {
+	if !supererror.CheckErr(err, 0) {
 		return err
 	}
 	node := LinkedNode{Value, list.Tail, nil}
@@ -59,9 +59,10 @@ func (list *LinkedList) AddValue(Value any) (err error) {
 	return nil
 }
 
-func (list *LinkedList) AddNode(node *LinkedNode) (err error) {
+// Append 向链表尾部添加节点
+func (list *LinkedList) Append(node *LinkedNode) (err error) {
 	err = list.CheckType(node.Value)
-	if !superError.CheckErr(err, 0) {
+	if !supererror.CheckErr(err, 0) {
 		return err
 	}
 	if list.isEmpty != 0 {
@@ -75,8 +76,22 @@ func (list *LinkedList) AddNode(node *LinkedNode) (err error) {
 	list.length++
 	return nil
 }
-func (list *LinkedList) Delete(node *LinkedNode) {
 
+// Delete 从链表删除节点
+func (list *LinkedList) Delete(node *LinkedNode) (err error) {
+	code := 0
+	if node.Next != null {
+		node.Next.Fore = node.Fore
+		code++
+	}
+	if node.Fore != null {
+		node.Fore.Next = node.Next
+		code++
+	}
+	if code != 0 {
+		length--
+		return NodeNotInListError
+	}
 }
 
 // Print 输出链表

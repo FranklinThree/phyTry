@@ -1,4 +1,4 @@
-package superError
+package supererror
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 )
 
 type RuntimeError struct {
+	UUID   long
 	Format string
 	Args   []any
 }
@@ -49,5 +50,10 @@ func ExampleError(Number int) IgnorableError {
 func TypeNotFitError(Type1 reflect.Type, Type2 reflect.Type) SeriousError {
 	var x []any
 	x = append(x, Type1, Type2)
+	return SeriousError{RuntimeError{"Type Not Fit! Expected: %+v <-> Got: %+v", x}}
+}
+func NodeNotInListError(list *LinkedList, node *LinkedNode) SeriousError {
+	var x []any
+	x = append(x, &list, &node)
 	return SeriousError{RuntimeError{"Type Not Fit! Expected: %+v <-> Got: %+v", x}}
 }

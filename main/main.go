@@ -2,7 +2,6 @@ package main
 
 import (
 	"com/github/FranklinThree/phyTry/formula"
-	"com/github/FranklinThree/phyTry/superError"
 )
 
 var CheckErr = superError.CheckErr
