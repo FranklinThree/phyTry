@@ -1,7 +1,7 @@
 package formula
 
 import (
-	"com/github/FranklinThree/phyTry/superError"
+	superError2 "com/github/FranklinThree/phyTry/superError"
 	"fmt"
 	"reflect"
 )
@@ -25,14 +25,14 @@ func (list *LinkedList) GetLock() bool {
 }
 func (list *LinkedList) Lock() error {
 	if list.lock {
-		return superError.LockReDo(list, list.lock)
+		return superError2.LockReDo(list, list.lock)
 	}
 	list.lock = true
 	return nil
 }
 func (list *LinkedList) Unlock() error {
 	if !list.lock {
-		return superError.LockReDo(list, list.lock)
+		return superError2.LockReDo(list, list.lock)
 	}
 	list.lock = false
 	return nil
@@ -40,7 +40,7 @@ func (list *LinkedList) Unlock() error {
 
 // CreateList 创建并初始化链表
 func CreateList(TypeOf any, valueLock bool) (list LinkedList, err error) {
-	return LinkedList{length: 0, TypeOf: TypeOf, IsEmpty: 1, valueLock: valueLock, lock: false}, superError.ExampleError(1)
+	return LinkedList{length: 0, TypeOf: TypeOf, IsEmpty: 1, valueLock: valueLock, lock: false}, superError2.ExampleError(1)
 }
 
 // CheckType 检查类型是否匹配（严格）
@@ -49,7 +49,7 @@ func (list *LinkedList) CheckType(Value any) error {
 	if reflect.TypeOf(Value) == reflect.TypeOf(list.TypeOf) {
 		return nil
 	} else {
-		return superError.TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
+		return superError2.TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
 	}
 }
 
@@ -73,14 +73,14 @@ func (list *LinkedList) HasNode(node *LinkedNode) (index int, err error) {
 		}
 		p = p.Next
 	}
-	return 0, superError.NodeNotInListError(list, node)
+	return 0, superError2.NodeNotInListError(list, node)
 
 }
 
 // Append 向链表尾部添加节点
 func (list *LinkedList) Append(node *LinkedNode) (err error) {
 	err = list.CheckType(node.Value)
-	if !superError.CheckErr(err, 0) {
+	if !superError2.CheckErr(err, 0) {
 		return err
 	}
 	if list.IsEmpty != 0 {
@@ -97,7 +97,7 @@ func (list *LinkedList) Append(node *LinkedNode) (err error) {
 
 // Delete 从链表删除节点
 func (list *LinkedList) Delete(node *LinkedNode) (err error) {
-	if _, err := list.HasNode(node); superError.CheckErr(err, 0) {
+	if _, err := list.HasNode(node); superError2.CheckErr(err, 0) {
 		return err
 	}
 	code := 0
@@ -122,12 +122,18 @@ func (list *LinkedList) FindNodeOf(Value any) (node *LinkedNode, err error) {
 		p = p.Next
 
 	}
-	return nil, superError.NodeNotFoundError(Value, list)
+	return nil, superError2.NodeNotFoundError(Value, list)
 
 }
 
 // Insert 将节点插入链表
 func (list *LinkedList) Insert(target *LinkedNode, isAfter bool, node *LinkedNode) (err error) {
+	if list.IsEmpty != 0 {
+		list.Head = node
+		list.Tail = node
+		list.IsEmpty = 0
+		return nil
+	}
 	if isAfter {
 		if target == list.Tail {
 			list.Tail = node
@@ -174,19 +180,19 @@ type LinkedNode struct {
 }
 
 // CreateLinkedNode 创建节点
-func CreateLinkedNode(Value any, list *LinkedList) LinkedNode {
-	return LinkedNode{Value, nil, nil, list, false}
+func CreateLinkedNode(Value any, list *LinkedList) *LinkedNode {
+	return &LinkedNode{Value, nil, nil, list, false}
 }
 func (node *LinkedNode) Lock() error {
 	if node.valueLock {
-		return superError.LockReDo(node, node.valueLock)
+		return superError2.LockReDo(node, node.valueLock)
 	}
 	node.valueLock = true
 	return nil
 }
 func (node *LinkedNode) Unlock() error {
 	if !node.valueLock {
-		return superError.LockReDo(node, node.valueLock)
+		return superError2.LockReDo(node, node.valueLock)
 	}
 	node.valueLock = false
 	return nil
