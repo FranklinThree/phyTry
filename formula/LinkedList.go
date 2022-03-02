@@ -1,7 +1,7 @@
 package formula
 
 import (
-	"com/github/FranklinThree/phyTry/superError"
+	"com/github/FranklinThree/phyTry/universal"
 	"fmt"
 	"reflect"
 )
@@ -24,14 +24,14 @@ func (list *LinkedList) GetLock() bool {
 }
 func (list *LinkedList) Lock() error {
 	if list.lock {
-		return superError.LockReDo(list, list.lock)
+		return universal.LockReDo(list, list.lock)
 	}
 	list.lock = true
 	return nil
 }
 func (list *LinkedList) Unlock() error {
 	if !list.lock {
-		return superError.LockReDo(list, list.lock)
+		return universal.LockReDo(list, list.lock)
 	}
 	list.lock = false
 	return nil
@@ -39,7 +39,7 @@ func (list *LinkedList) Unlock() error {
 
 // CreateList 创建并初始化链表
 func CreateList(TypeOf any, valueLock bool) (list LinkedList, err error) {
-	return LinkedList{length: 0, TypeOf: TypeOf, valueLock: valueLock, lock: false}, superError.ExampleError(1)
+	return LinkedList{length: 0, TypeOf: TypeOf, valueLock: valueLock, lock: false}, universal.ExampleError(1)
 }
 
 // CheckType 检查类型是否匹配（严格）
@@ -83,7 +83,7 @@ func (list *LinkedList) Append(node *LinkedNode) (err error) {
 	if index, _ := list.HasNode(node); index != -1 {
 		return NodeAlreadyInListError(list, node)
 	}
-	if err = list.CheckType(node.Value); !superError.CheckErr(err, 0) {
+	if err = list.CheckType(node.Value); !universal.CheckErr(err, 0) {
 		return err
 	}
 	if list.length == 0 {
@@ -107,10 +107,10 @@ func (list *LinkedList) Insert(node *LinkedNode, dest *LinkedNode, isAfter bool)
 	if index, _ := list.HasNode(node); index != -1 {
 		return NodeAlreadyInListError(list, node)
 	}
-	if _, err := list.HasNode(dest); !superError.CheckErr(err, 0) {
+	if _, err := list.HasNode(dest); !universal.CheckErr(err, 0) {
 		return err
 	}
-	if err = list.CheckType(node.Value); !superError.CheckErr(err, 0) {
+	if err = list.CheckType(node.Value); !universal.CheckErr(err, 0) {
 		return err
 	}
 	if dest == nil || list.length == 0 {
@@ -146,7 +146,7 @@ func (list *LinkedList) Insert(node *LinkedNode, dest *LinkedNode, isAfter bool)
 
 // Delete 从链表删除节点
 func (list *LinkedList) Delete(node *LinkedNode) (err error) {
-	if _, err := list.HasNode(node); !superError.CheckErr(err, 0) {
+	if _, err := list.HasNode(node); !universal.CheckErr(err, 0) {
 		return err
 	}
 	if node != list.Head {
@@ -206,7 +206,7 @@ func CreateLinkedNode(Value any, list *LinkedList) (*LinkedNode, error) {
 	node := &LinkedNode{Value, nil, nil, list, false}
 	if list != nil {
 		err := list.Append(node)
-		if !superError.CheckErr(err, 0) {
+		if !universal.CheckErr(err, 0) {
 			return nil, err
 		}
 	}
@@ -215,14 +215,14 @@ func CreateLinkedNode(Value any, list *LinkedList) (*LinkedNode, error) {
 }
 func (node *LinkedNode) Lock() error {
 	if node.valueLock {
-		return superError.LockReDo(node, node.valueLock)
+		return universal.LockReDo(node, node.valueLock)
 	}
 	node.valueLock = true
 	return nil
 }
 func (node *LinkedNode) Unlock() error {
 	if !node.valueLock {
-		return superError.LockReDo(node, node.valueLock)
+		return universal.LockReDo(node, node.valueLock)
 	}
 	node.valueLock = false
 	return nil
@@ -258,29 +258,29 @@ func CreateIterator(list *LinkedList, node *LinkedNode) (it Iterator, err error)
 }
 
 // TypeNotFitError 类型不匹配错误
-func TypeNotFitError(Type1 reflect.Type, Type2 reflect.Type) superError.SeriousError {
+func TypeNotFitError(Type1 reflect.Type, Type2 reflect.Type) universal.SeriousError {
 	var x []any
 	x = append(x, Type1, Type2)
-	return superError.SeriousError{RuntimeError: superError.RuntimeError{UUID: 1001, Format: "Type Not Fit! Expected: %v <-> Got: %v", Args: x}}
+	return universal.SeriousError{RuntimeError: universal.RuntimeError{UUID: 1001, Format: "Type Not Fit! Expected: %v <-> Got: %v", Args: x}}
 }
 
 // NodeNotInListError 节点不在链表中错误
-func NodeNotInListError(list *LinkedList, node *LinkedNode) superError.SeriousError {
+func NodeNotInListError(list *LinkedList, node *LinkedNode) universal.SeriousError {
 	var x []any
 	x = append(x, node, list)
-	return superError.SeriousError{RuntimeError: superError.RuntimeError{UUID: 1002, Format: "Can't find Node %#v in List %#v!", Args: x}}
+	return universal.SeriousError{RuntimeError: universal.RuntimeError{UUID: 1002, Format: "Can't find Node %#v in List %#v!", Args: x}}
 }
 
 // NodeOfValueNotFoundError 记录相应值的节点不在链表中错误
-func NodeOfValueNotFoundError(NodeOf any, list *LinkedList) superError.IgnorableError {
+func NodeOfValueNotFoundError(NodeOf any, list *LinkedList) universal.IgnorableError {
 	var x []any
 	x = append(x, NodeOf, &list)
-	return superError.IgnorableError{RuntimeError: superError.RuntimeError{UUID: 2001, Format: "Cannot find the node of (%v) in the list (%v)", Args: x}}
+	return universal.IgnorableError{RuntimeError: universal.RuntimeError{UUID: 2001, Format: "Cannot find the node of (%v) in the list (%v)", Args: x}}
 
 }
 
-func NodeAlreadyInListError(list *LinkedList, node *LinkedNode) superError.SeriousError {
+func NodeAlreadyInListError(list *LinkedList, node *LinkedNode) universal.SeriousError {
 	var x []any
 	x = append(x, node, list)
-	return superError.SeriousError{RuntimeError: superError.RuntimeError{UUID: 1002, Format: "Node %#v are already in List %#v!", Args: x}}
+	return universal.SeriousError{RuntimeError: universal.RuntimeError{UUID: 1002, Format: "Node %#v are already in List %#v!", Args: x}}
 }

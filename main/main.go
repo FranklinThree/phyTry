@@ -2,11 +2,11 @@ package main
 
 import (
 	"com/github/FranklinThree/phyTry/formula"
-	"com/github/FranklinThree/phyTry/superError"
+	"com/github/FranklinThree/phyTry/universal"
 	"fmt"
 )
 
-var CheckErr = superError.CheckErr
+var CheckErr = universal.CheckErr
 
 func main() {
 	list, _ := formula.CreateList(int(1), false)

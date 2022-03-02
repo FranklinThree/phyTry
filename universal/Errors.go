@@ -1,11 +1,11 @@
-package superError
+package universal
 
 import (
 	"fmt"
 )
 
 type RuntimeError struct {
-	UUID   int
+	UUID   int64
 	Format string
 	Args   []any
 }

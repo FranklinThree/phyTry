@@ -1,4 +1,4 @@
-package superError
+package universal
 
 type MyUIDGenerator struct {
 }
