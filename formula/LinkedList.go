@@ -1,7 +1,7 @@
 package formula
 
 import (
-	superError2 "com/github/FranklinThree/phyTry/superError"
+	"com/github/FranklinThree/phyTry/superError"
 	"fmt"
 	"reflect"
 )
@@ -12,7 +12,6 @@ type LinkedList struct {
 	Head      *LinkedNode
 	Tail      *LinkedNode
 	TypeOf    any
-	IsEmpty   int
 	valueLock bool //valueLock	公共值锁，true时禁止修改链表值，false时不禁止修改值
 	lock      bool //lock		链表锁
 }
@@ -25,14 +24,14 @@ func (list *LinkedList) GetLock() bool {
 }
 func (list *LinkedList) Lock() error {
 	if list.lock {
-		return superError2.LockReDo(list, list.lock)
+		return superError.LockReDo(list, list.lock)
 	}
 	list.lock = true
 	return nil
 }
 func (list *LinkedList) Unlock() error {
 	if !list.lock {
-		return superError2.LockReDo(list, list.lock)
+		return superError.LockReDo(list, list.lock)
 	}
 	list.lock = false
 	return nil
@@ -40,7 +39,7 @@ func (list *LinkedList) Unlock() error {
 
 // CreateList 创建并初始化链表
 func CreateList(TypeOf any, valueLock bool) (list LinkedList, err error) {
-	return LinkedList{length: 0, TypeOf: TypeOf, IsEmpty: 1, valueLock: valueLock, lock: false}, superError2.ExampleError(1)
+	return LinkedList{length: 0, TypeOf: TypeOf, valueLock: valueLock, lock: false}, superError.ExampleError(1)
 }
 
 // CheckType 检查类型是否匹配（严格）
@@ -49,7 +48,7 @@ func (list *LinkedList) CheckType(Value any) error {
 	if reflect.TypeOf(Value) == reflect.TypeOf(list.TypeOf) {
 		return nil
 	} else {
-		return superError2.TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
+		return TypeNotFitError(reflect.TypeOf(list.TypeOf), reflect.TypeOf(Value))
 	}
 }
 
@@ -69,46 +68,99 @@ func (list *LinkedList) HasNode(node *LinkedNode) (index int, err error) {
 	p := list.Head
 	for p != nil {
 		if p == node {
+			//找到节点，返回节点index
 			return index, nil
 		}
 		p = p.Next
 	}
-	return 0, superError2.NodeNotInListError(list, node)
+	//未找到节点，返回-1
+	return -1, NodeNotInListError(list, node)
 
 }
 
 // Append 向链表尾部添加节点
 func (list *LinkedList) Append(node *LinkedNode) (err error) {
-	err = list.CheckType(node.Value)
-	if !superError2.CheckErr(err, 0) {
+	if index, _ := list.HasNode(node); index != -1 {
+		return NodeAlreadyInListError(list, node)
+	}
+	if err = list.CheckType(node.Value); !superError.CheckErr(err, 0) {
 		return err
 	}
-	if list.IsEmpty != 0 {
+	if list.length == 0 {
 		list.Head = node
 		list.Tail = node
-		list.IsEmpty = 0
+		list.length++
 		return nil
 	}
+
+	node.list = list
+	node.Fore = list.Tail
+
 	list.Tail.Next = node
 	list.Tail = node
 	list.length++
 	return nil
 }
 
-// Delete 从链表删除节点
-func (list *LinkedList) Delete(node *LinkedNode) (err error) {
-	if _, err := list.HasNode(node); superError2.CheckErr(err, 0) {
+// Insert 将节点插入链表
+func (list *LinkedList) Insert(node *LinkedNode, dest *LinkedNode, isAfter bool) (err error) {
+	if index, _ := list.HasNode(node); index != -1 {
+		return NodeAlreadyInListError(list, node)
+	}
+	if _, err := list.HasNode(dest); !superError.CheckErr(err, 0) {
 		return err
 	}
-	code := 0
-	if node == list.Head {
-		node.Next.Fore = node.Fore
-		code++
+	if err = list.CheckType(node.Value); !superError.CheckErr(err, 0) {
+		return err
 	}
-	if node == list.Tail {
+	if dest == nil || list.length == 0 {
+		err = list.Append(node)
+		return
+	}
+	if isAfter {
+		if dest == list.Tail {
+			list.Tail = node
+		} else {
+			dest.Next.Fore = node
+		}
+		node.Next = dest.Next
+		node.Fore = dest
+		dest.Next = node
+	} else {
+		if dest == list.Head {
+			list.Head = node
+
+		} else {
+			dest.Fore.Next = node
+		}
+		node.Fore = dest.Fore
+		node.Next = dest
+		dest.Fore = node
+	}
+
+	node.list = list
+
+	list.length++
+	return nil
+}
+
+// Delete 从链表删除节点
+func (list *LinkedList) Delete(node *LinkedNode) (err error) {
+	if _, err := list.HasNode(node); !superError.CheckErr(err, 0) {
+		return err
+	}
+	if node != list.Head {
 		node.Fore.Next = node.Next
-		code++
 	}
+	if node != list.Tail {
+		node.Next.Fore = node.Fore
+	}
+
+	node.Fore = nil
+	node.Next = nil
+	node.list = nil
+
+	list.length--
 	return nil
 
 }
@@ -122,39 +174,8 @@ func (list *LinkedList) FindNodeOf(Value any) (node *LinkedNode, err error) {
 		p = p.Next
 
 	}
-	return nil, superError2.NodeNotFoundError(Value, list)
+	return nil, NodeOfValueNotFoundError(Value, list)
 
-}
-
-// Insert 将节点插入链表
-func (list *LinkedList) Insert(target *LinkedNode, isAfter bool, node *LinkedNode) (err error) {
-	if list.IsEmpty != 0 {
-		list.Head = node
-		list.Tail = node
-		list.IsEmpty = 0
-		return nil
-	}
-	if isAfter {
-		if target == list.Tail {
-			list.Tail = node
-		} else {
-			target.Next.Fore = node
-		}
-		node.Next = target.Next
-		node.Fore = target
-		target.Next = node
-	} else {
-		if target == list.Head {
-			list.Head = node
-		} else {
-			target.Fore.Next = node
-		}
-		node.Fore = target.Fore
-		node.Next = target
-		target.Fore = node
-	}
-	list.length++
-	return nil
 }
 
 // Print 输出链表
@@ -164,7 +185,7 @@ func (list *LinkedList) Print(form int) {
 	case 0:
 		node = list.Head
 		for node != nil {
-			fmt.Printf("%v\n", node.Value)
+			fmt.Printf("%#v\n", node.Value)
 			node = node.Next
 		}
 	}
@@ -180,19 +201,28 @@ type LinkedNode struct {
 }
 
 // CreateLinkedNode 创建节点
-func CreateLinkedNode(Value any, list *LinkedList) *LinkedNode {
-	return &LinkedNode{Value, nil, nil, list, false}
+func CreateLinkedNode(Value any, list *LinkedList) (*LinkedNode, error) {
+
+	node := &LinkedNode{Value, nil, nil, list, false}
+	if list != nil {
+		err := list.Append(node)
+		if !superError.CheckErr(err, 0) {
+			return nil, err
+		}
+	}
+	return node, nil
+
 }
 func (node *LinkedNode) Lock() error {
 	if node.valueLock {
-		return superError2.LockReDo(node, node.valueLock)
+		return superError.LockReDo(node, node.valueLock)
 	}
 	node.valueLock = true
 	return nil
 }
 func (node *LinkedNode) Unlock() error {
 	if !node.valueLock {
-		return superError2.LockReDo(node, node.valueLock)
+		return superError.LockReDo(node, node.valueLock)
 	}
 	node.valueLock = false
 	return nil
@@ -202,6 +232,13 @@ func (node *LinkedNode) GetValueLock() bool {
 }
 func (node *LinkedNode) GetList() *LinkedList {
 	return node.list
+}
+func (node *LinkedNode) Print(format int) {
+	switch format {
+	case 0:
+		fmt.Println(node.Value)
+
+	}
 }
 
 // Iterator 链表迭代器
@@ -218,4 +255,32 @@ func CreateIterator(list *LinkedList, node *LinkedNode) (it Iterator, err error)
 	}
 	index, err := list.HasNode(node)
 	return Iterator{list, node, index}, err
+}
+
+// TypeNotFitError 类型不匹配错误
+func TypeNotFitError(Type1 reflect.Type, Type2 reflect.Type) superError.SeriousError {
+	var x []any
+	x = append(x, Type1, Type2)
+	return superError.SeriousError{RuntimeError: superError.RuntimeError{UUID: 1001, Format: "Type Not Fit! Expected: %v <-> Got: %v", Args: x}}
+}
+
+// NodeNotInListError 节点不在链表中错误
+func NodeNotInListError(list *LinkedList, node *LinkedNode) superError.SeriousError {
+	var x []any
+	x = append(x, node, list)
+	return superError.SeriousError{RuntimeError: superError.RuntimeError{UUID: 1002, Format: "Can't find Node %#v in List %#v!", Args: x}}
+}
+
+// NodeOfValueNotFoundError 记录相应值的节点不在链表中错误
+func NodeOfValueNotFoundError(NodeOf any, list *LinkedList) superError.IgnorableError {
+	var x []any
+	x = append(x, NodeOf, &list)
+	return superError.IgnorableError{RuntimeError: superError.RuntimeError{UUID: 2001, Format: "Cannot find the node of (%v) in the list (%v)", Args: x}}
+
+}
+
+func NodeAlreadyInListError(list *LinkedList, node *LinkedNode) superError.SeriousError {
+	var x []any
+	x = append(x, node, list)
+	return superError.SeriousError{RuntimeError: superError.RuntimeError{UUID: 1002, Format: "Node %#v are already in List %#v!", Args: x}}
 }
