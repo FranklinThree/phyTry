@@ -9,13 +9,13 @@ import (
 var CheckErr = universal.CheckErr
 
 func main() {
-	list, _ := formula.CreateList(int(1), false)
+	list, _ := formula.NewList(int(1), false)
 	var err error
-	node1, err := formula.CreateLinkedNode(1, &list)
-	node2, err := formula.CreateLinkedNode(2, &list)
-	node3, err := formula.CreateLinkedNode(3, &list)
-	node4, err := formula.CreateLinkedNode(4, &list)
-	node5, err := formula.CreateLinkedNode(5, nil)
+	node1, err := formula.NewLinkedNode(1, &list)
+	node2, err := formula.NewLinkedNode(2, &list)
+	node3, err := formula.NewLinkedNode(3, &list)
+	node4, err := formula.NewLinkedNode(4, &list)
+	node5, err := formula.NewLinkedNode(5, nil)
 
 	node1.Print(0)
 

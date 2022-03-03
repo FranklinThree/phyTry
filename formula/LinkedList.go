@@ -37,8 +37,8 @@ func (list *LinkedList) Unlock() error {
 	return nil
 }
 
-// CreateList 创建并初始化链表
-func CreateList(TypeOf any, valueLock bool) (list LinkedList, err error) {
+// NewList 创建并初始化链表
+func NewList(TypeOf any, valueLock bool) (list LinkedList, err error) {
 	return LinkedList{length: 0, TypeOf: TypeOf, valueLock: valueLock, lock: false}, universal.ExampleError(1)
 }
 
@@ -200,8 +200,8 @@ type LinkedNode struct {
 	valueLock bool
 }
 
-// CreateLinkedNode 创建节点
-func CreateLinkedNode(Value any, list *LinkedList) (*LinkedNode, error) {
+// NewLinkedNode 创建节点
+func NewLinkedNode(Value any, list *LinkedList) (*LinkedNode, error) {
 
 	node := &LinkedNode{Value, nil, nil, list, false}
 	if list != nil {
@@ -248,8 +248,8 @@ type Iterator struct {
 	index int
 }
 
-// CreateIterator 创建迭代器
-func CreateIterator(list *LinkedList, node *LinkedNode) (it Iterator, err error) {
+// NewIterator 创建迭代器
+func NewIterator(list *LinkedList, node *LinkedNode) (it Iterator, err error) {
 	if node == nil {
 		return Iterator{list, list.Head, 0}, nil
 	}
