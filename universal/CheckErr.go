@@ -1,11 +1,16 @@
 package universal
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // CheckErr 可以继续运行返回ture，无法运行返回false
 func CheckErr(err error, level int) bool {
 
 	switch err.(type) {
+	case error:
+		fmt.Println(err.Error())
+		return false
 	case IgnorableError:
 		if level > 1 {
 

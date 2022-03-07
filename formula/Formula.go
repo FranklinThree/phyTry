@@ -3,6 +3,7 @@ package formula
 import (
 	"com/github/FranklinThree/phyTry/universal"
 	"math"
+	"reflect"
 )
 
 // Formula 公式
@@ -106,7 +107,7 @@ func ToPreF(expr string) (pf *PreF, err error) {
 						hasE = true
 					} else if tc == '-' {
 						if pi.r != 0 || pi.l != 0 {
-							return //(3-4).5此类错误出口
+							return //-号未在开头 错误出口
 						}
 						pi.pn = -1
 					} else {
@@ -116,10 +117,10 @@ func ToPreF(expr string) (pf *PreF, err error) {
 					ti++
 
 				}
-				for le.r > 1 {
+				for le.r > float64(1) {
 					le.r /= 10
 				}
-				for re.r > 1 {
+				for re.r > float64(1) {
 					re.r /= 10
 				}
 				res = (le.l + le.r) * math.Pow(10, (re.l+re.r)*re.pn) * le.pn
@@ -157,5 +158,59 @@ func paraNumberNotFitError(given int, expected int) universal.SeriousError {
 	}}
 }
 
-type function struct {
+type Function struct {
+	Name       string
+	F          func(...any) (float64, error)
+	ParaLength int
+	Params     []param
+}
+type param struct {
+	Name string
+	Type string
+}
+type FunctionSet struct {
+	Name string
+	Fs   []Function
+}
+
+var (
+	DefaultFunctionSet = FunctionSet{
+		Name: "DEFAULT",
+		Fs: []Function{
+			{
+				Name: "cos",
+				F: func(a ...any) (float64, error) {
+					if len(a) != 1 {
+						return 0, FunctionParaNumberNotFitError(1, 1)
+					}
+					x, isOK := a[0].(float64)
+					if isOK {
+						return math.Cos(x), nil
+					} else {
+						return 0, FunctionParaTypeNotFitError(reflect.TypeOf(x).String(), "float64")
+					}
+					//switch ta := a[0].(type) {
+					//case float64:
+					//	return math.Cos(ta), nil
+					//default:
+					//	return 0, nil
+					//}
+
+				},
+				ParaLength: 0,
+				Params:     nil,
+			},
+		},
+	}
+)
+
+func FunctionParaNumberNotFitError(given int, expected int) universal.SeriousError {
+	var x []any
+	x = append(x, given, expected)
+	return universal.NewSeriousError(1004, "The number of function parameters is not fit!Given: %d ; Expected: %d", x)
+}
+func FunctionParaTypeNotFitError(given string, expected string) universal.SeriousError {
+	var x []any
+	x = append(x, given, expected)
+	return universal.NewSeriousError(1005, "The Type of function parameter is not fit!Given: %d ;Expected: %d", x)
 }

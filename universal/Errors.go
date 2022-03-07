@@ -18,8 +18,19 @@ func (re RuntimeError) Error() string {
 type IgnorableError struct {
 	RuntimeError
 }
+
+func NewIgnorableError(UUID int64, Format string, Args []any) IgnorableError {
+	return IgnorableError{RuntimeError{UUID: UUID, Format: Format, Args: Args}}
+
+}
+
 type SeriousError struct {
 	RuntimeError
+}
+
+func NewSeriousError(UUID int64, Format string, Args []any) SeriousError {
+	return SeriousError{RuntimeError{UUID: UUID, Format: Format, Args: Args}}
+
 }
 
 //func (ie *IgnorableError) Print() {

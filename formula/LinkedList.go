@@ -58,14 +58,10 @@ func (list *LinkedList) CheckType(Value any) error {
 }
 
 // CheckTypeCompatible 检查类型是否兼容（宽松）
-func (list *LinkedList) CheckTypeCompatible(Value any) error {
-	//fmt.Printf(">>>> %v >>>> %v\n", reflect.TypeOf(value), list.TypeOf)
-	//switch value.(type) {
-	//case reflect.TypeOf(list.Typeof):
-	//
-	//}
-	return nil
-}
+//func (list *LinkedList) CheckTypeCompatible(Value any) error {
+//
+//	return nil
+//}
 
 // HasNode 检查节点是否在链表上
 func (list *LinkedList) HasNode(node *LinkedNode) (index int, err error) {
