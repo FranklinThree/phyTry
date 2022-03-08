@@ -124,6 +124,11 @@ func ToPreF(expr string) (pf *PreF, err error) {
 					re.r /= 10
 				}
 				res = (le.l + le.r) * math.Pow(10, (re.l+re.r)*re.pn) * le.pn
+				err = s.AppendByValue(res)
+				if !universal.CheckErr(err, 0) {
+					return
+				}
+
 			}()
 
 		} else if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' { //函数解析
@@ -159,49 +164,58 @@ func paraNumberNotFitError(given int, expected int) universal.SeriousError {
 }
 
 type Function struct {
-	Name       string
-	F          func(...any) (float64, error)
-	ParaLength int
-	Params     []param
+	Name string
+	F    any
 }
+
 type param struct {
 	Name string
 	Type string
 }
 type FunctionSet struct {
-	Name string
-	Fs   []Function
+	Name       string
+	Fs         []Function
+	funcType   reflect.Type
+	ParaLength int
 }
+type FunctionFolder struct {
+	Name string
+	Fss  []FunctionSet
+}
+type defaultFunc func(float64) float64
 
 var (
 	DefaultFunctionSet = FunctionSet{
-		Name: "DEFAULT",
+		Name:       "DEFAULT",
+		ParaLength: 1,
+
 		Fs: []Function{
 			{
 				Name: "cos",
-				F: func(a ...any) (float64, error) {
-					if len(a) != 1 {
-						return 0, FunctionParaNumberNotFitError(1, 1)
-					}
-					x, isOK := a[0].(float64)
-					if isOK {
-						return math.Cos(x), nil
-					} else {
-						return 0, FunctionParaTypeNotFitError(reflect.TypeOf(x).String(), "float64")
-					}
-					//switch ta := a[0].(type) {
-					//case float64:
-					//	return math.Cos(ta), nil
-					//default:
-					//	return 0, nil
-					//}
-
+				F: func(a float64) float64 {
+					return math.Cos(a)
 				},
-				ParaLength: 0,
-				Params:     nil,
+			},
+			{
+				Name: "sin",
+				F: func(a float64) float64 {
+					return math.Sin(a)
+				},
+			},
+			{
+				Name: "log",
+				F: func(a float64) float64 {
+					return math.Log(a)
+				},
 			},
 		},
+		funcType: reflect.TypeOf(
+			func(float64) float64 {
+				return 0
+			}(0),
+		),
 	}
+	H = FunctionFolder{"Home", []FunctionSet{DefaultFunctionSet}}
 )
 
 func FunctionParaNumberNotFitError(given int, expected int) universal.SeriousError {
