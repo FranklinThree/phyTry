@@ -80,12 +80,12 @@ func ToPreF(expr string) (pf *PreF, err error) {
 		ti := i
 
 		if c >= '0' && c <= '9' { //数字字符解析
-			var pi *MFloat
-			le := NewMFloat(0, 0)
-			re := NewMFloat(0, 0)
-			var res float64
 
 			func() {
+				var pi *MFloat
+				le := NewMFloat(0, 0)
+				re := NewMFloat(0, 0)
+				var res float64
 				pi = &le
 				hasPoint := false
 				hasE := false
